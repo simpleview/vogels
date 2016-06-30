@@ -470,6 +470,37 @@ describe('schema', function () {
       clock.restore();
     });
 
+    it('should return result of nested default functions', function () {
+      var clock = sinon.useFakeTimers(Date.now());
+
+      var config = {
+        hashKey : 'email',
+        schema : {
+          email   : Joi.string(),
+          created : Joi.date().default(Date.now),
+          properties : Joi.array().includes(Joi.object().keys({
+            created : Joi.date().default(Date.now),
+            name : Joi.string().default('Tim Testers property')
+          }))
+        }
+      };
+
+      var s = new Schema(config);
+
+      var d = s.applyDefaults({email: 'foo@bar.com', properties: [ {} ] });
+
+      d.should.eql({
+        email : 'foo@bar.com',
+        created : Date.now(),
+        properties : [{
+          created : Date.now(),
+          name : 'Tim Testers property'
+        }]
+      });
+
+      clock.restore();
+    });
+
   });
 
 });
