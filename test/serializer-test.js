@@ -524,35 +524,84 @@ describe('Serializer', function () {
   describe('#deserializeItem', function () {
     it('should return string value', function () {
       var itemResp = {name : 'Tim Tester' };
+      var config = {
+        hashKey: 'name',
+        schema: {
+          name: Joi.string()
+        }
+      };
+      var s = new Schema(config);
 
-      var item = serializer.deserializeItem(itemResp);
+      var item = serializer.deserializeItem(itemResp, s);
 
       item.name.should.equal('Tim Tester');
     });
 
     it('should return values in StringSet', function () {
       var itemResp = {names : docClient.createSet(['a', 'b', 'c'])};
+      var config = {
+        hashKey: 'stub',
+        schema: {
+          stub: Joi.string(),
+          names: Schema.types.stringSet()
+        }
+      };
+      var s = new Schema(config);
 
-      var item = serializer.deserializeItem(itemResp);
+      var item = serializer.deserializeItem(itemResp, s);
 
       item.names.should.eql(['a', 'b', 'c']);
     });
 
     it('should return values in NumberSet', function () {
       var itemResp = {scores : docClient.createSet([1, 2, 3])};
+      var config = {
+        hashKey: 'stub',
+        schema: {
+          stub: Joi.string(),
+          names: Schema.types.numberSet()
+        }
+      };
+      var s = new Schema(config);
 
-      var item = serializer.deserializeItem(itemResp);
+      var item = serializer.deserializeItem(itemResp, s);
 
       item.scores.should.eql([1, 2, 3]);
     });
 
     it('should return null when item is null', function () {
-      var item = serializer.deserializeItem(null);
+      var config = {
+        hashKey: 'stub',
+        schema: {
+          stub: Joi.string(),
+        }
+      };
+      var s = new Schema(config);
+      var item = serializer.deserializeItem(null, s);
 
       expect(item).to.be.null;
     });
 
     it('should return nested values', function () {
+
+      var config = {
+        hashKey: 'stub',
+        schema: {
+          stub: Joi.string(),
+          name: Joi.string(),
+          scores: Schema.types.numberSet(),
+          things: Joi.array().includes(Joi.object().keys({
+            title: Joi.string(),
+            letters: Schema.types.stringSet()
+          })),
+          info: Joi.object().keys({
+            name: Joi.string(),
+            ages: Schema.types.numberSet()
+          })
+        }
+      };
+      var s = new Schema(config);
+
       var itemResp = {
         name : 'foo bar',
         scores : docClient.createSet([1, 2, 3]),
@@ -569,7 +618,7 @@ describe('Serializer', function () {
         }
       };
 
-      var item = serializer.deserializeItem(itemResp);
+      var item = serializer.deserializeItem(itemResp, s);
 
       item.should.eql({
         name : 'foo bar',
