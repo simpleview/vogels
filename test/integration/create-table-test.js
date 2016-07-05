@@ -376,7 +376,7 @@ describe('Update Tables Integration Tests', function() {
         UserId            : Joi.string(),
         TweetID           : vogels.types.uuid(),
         content           : Joi.string(),
-        PublishedDateTime : Joi.date().default(Date.now)
+        PublishedDateTime : Joi.date().default(Date.now, 'date.now')
       }
     });
 
@@ -396,7 +396,7 @@ describe('Update Tables Integration Tests', function() {
         UserId            : Joi.string(),
         TweetID           : vogels.types.uuid(),
         content           : Joi.string(),
-        PublishedDateTime : Joi.date().default(Date.now)
+        PublishedDateTime : Joi.date().default(Date.now, 'date.now')
       },
       indexes : [
         { hashKey : 'UserId', rangeKey : 'PublishedDateTime', type : 'global', name : 'PublishedDateTimeIndex'}
